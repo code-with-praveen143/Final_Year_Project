@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lung Cancer Nodule Classification</title>
+</head>
+<body>
+    <h1>signature forgery detection</h1>
+    <h2>Upload Dataset</h2>
+        <button onclick="upload()">upload Dataset</button>
+			<script>
+	function upload() {
+	  var xhr = new XMLHttpRequest();
+	  xhr.open('GET', '/uploadDataset', true);
+	  xhr.onload = function () {
+		if (xhr.status >= 200 && xhr.status < 300) {
+		  var responseData = JSON.parse(xhr.responseText);
+		  alert("Message: " + responseData.message);
+		} else {
+		  console.error('Request failed with status', xhr.status);
+		}
+	  };
+	  xhr.send();
+}
+
+</script>
+
+    <h2>Read & Split Dataset to Train & Test</h2>
+	<button onclick="splitDataset()">Split Dataset</button>
+	<script>
+	function splitDataset() {
+	  var xhr = new XMLHttpRequest();
+	  xhr.open('GET', '/splitDataset', true);
+	  xhr.onload = function () {
+		if (xhr.status >= 200 && xhr.status < 300) {
+		  var responseData = JSON.parse(xhr.responseText);
+		  alert("Message: " + responseData.message +
+				"\nTotal Images: " + responseData.total_images +
+				"\nTrain Split: " + responseData.train_split +
+				"\nTest Split: " + responseData.test_split);
+		} else {
+		  console.error('Request failed with status', xhr.status);
+		}
+	  };
+	  xhr.send();
+}
+
+</script>
+    <h2>Execute SVM Algorithms</h2>
+	<button onclick="execute_svm()">Execute SVM</button>
+	<script>
+	function execute_svm() {
+	  var xhr = new XMLHttpRequest();
+	  xhr.open('GET', '/executeSVM', true);
+	  xhr.onload = function () {
+		if (xhr.status >= 200 && xhr.status < 300) {
+		  var responseData = JSON.parse(xhr.responseText);
+		  alert("Message: " + responseData.message +"\n svm_accuracy : " + responseData.svm_accuracy);
+		} else {
+		  console.error('Request failed with status', xhr.status);
+		}
+	  };
+	  xhr.send();
+}
+
+</script>
+	
+	
+
+    <h2>Execute K-Means Algorithm</h2>
+<button onclick="execute_kmeans()">Execute kmeans</button>
+	<script>
+	function execute_kmeans() {
+	  var xhr = new XMLHttpRequest();
+	  xhr.open('GET', '/executeKmeans', true);
+	  xhr.onload = function () {
+		if (xhr.status >= 200 && xhr.status < 300) {
+		  var responseData = JSON.parse(xhr.responseText);
+		  alert("Message: " + responseData.message
+		  +"\n kmeans_accuracy : " + responseData.kmeans_accuracy);
+		} else {
+		  console.error('Request failed with status', xhr.status);
+		}
+	  };
+	  xhr.send();
+}
+
+</script>
+    <h2>Predict </h2>
+<body>
+    <h1>Image Processing Operations</h1>
+    <form action="/process" method="post" enctype="multipart/form-data">
+        <label for="operation">Select operation:</label>
+        <select name="operation" id="operation">
+            <option value="resize">Resize</option>
+            <option value="compress">Compress</option>
+            <option value="contour">Contour Detection</option>
+            <option value="edge">Edge Detection</option>
+            <option value="masking">Masking</option>
+            <option value="grading">Grading</option>
+        </select><br><br>
+
+        <label for="image">Select image:</label>
+        <input type="file"  name="image" ><br><br>
+	
+        <input type="submit" value="process">
+    </form>
+</body>
+
+
+
+
+<title>Image Forgery Detection</title>
+<form id="upload-form" action="/check_forgery" method="post" enctype="multipart/form-data">
+        <label for="image1">Upload First Image:</label>
+        <input type="file" id="image1" name="image1" accept="image/*"><br><br>
+
+        <label for="image2">Upload Second Image:</label>
+        <input type="file" id="image2" name="image2" accept="image/*"><br><br>
+
+        <input type="submit" value="Check Forgery">
+    </form>
+
+    <div id="popup" style="display:none;">
+        <h2>Forgery Detected!</h2>
+        <p>The uploaded images may be forged.</p>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#upload-form').submit(function(event) {
+                event.preventDefault();
+
+                var form_data = new FormData();
+                form_data.append('image1', $('#image1')[0].files[0]);
+                form_data.append('image2', $('#image2')[0].files[0]);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/check_forgery',
+                    data: form_data,
+                    contentType: false,
+                    cache: false,
+                    processData: false,
+                    success: function(response) {
+                        if (response.forged) {
+                            $('#popup').show();
+                        } else {
+                            $('#popup').hide();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <h2>Accuracy Graph</h2>
+    <form action="/graph" method="post">
+        <button type="submit">Show Graph</button>
+    </form>
+	
+</body>
+</html>
