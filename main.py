@@ -112,7 +112,7 @@ def check_forgery():
 # Home page with buttons
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index1.html')
 
 # Image processing route
 @app.route('/process', methods=['POST'])
