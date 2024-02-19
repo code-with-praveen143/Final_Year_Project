@@ -13,6 +13,9 @@ import cv2
 import numpy as np
 import os
 from werkzeug.utils import secure_filename
+from flask import *
+from twilio.rest import Client
+import random
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -107,7 +110,7 @@ def check_forgery():
 # Home page with buttons
 @app.route('/')
 def home():
-    return render_template('index1.html')
+    return render_template('login.html')
 
 # Image processing route
 @app.route('/process', methods=['POST'])
@@ -229,11 +232,79 @@ def login():
         for user in users:
             if user['username'] == username and user['password'] == password:
                 #return f"Welcome, {user['fullname']}!"
-                return render_template('index1.html')
+                return render_template('otp.html')
 
         return "Invalid username or password"
 
     return render_template('login.html')
+
+
+# OTP generation 
+otp = random.randint(1000,9999)
+generated_otp = otp
+
+@app.route('/getOTP',methods = ['POST'])
+def getOTP():
+    number = request.form['phonenumber']
+    val = getOTPApi(number)
+    if val:
+        return render_template('otp.html')
+# def generateOTP():
+#     return random.randrange(100000,999999)
+def getOTPApi(number):
+    # otp = generateOTP()
+    if(number == "7569993454"):
+        account_id_1 = "ACb149e7a0d945b21d311a10f1e1c02a7b"
+        auth_token_1 = 'd1c66b4f2384ee26098caa8ef846a492'
+        client_1 = Client(account_id_1,auth_token_1)
+        msg = client_1.messages.create(
+            body = f"Your Online Curation Cheque System Verification Code: {otp}",
+            from_ = "+19282491201",
+            to = "+917569993454"
+        )
+    elif(number == "9949700759"):
+        account_id_2 = "ACe254c3696c6e63e0f1585af6d173691f"
+        auth_token_2 = '777a478fd79b98b597f6c8a985f85cf0'
+        client_2 = Client(account_id_2,auth_token_2)
+        msg = client_2.messages.create(
+            body = f"Your Online Curation Cheque System Verification Code: {otp}",
+            from_ = "+19792726652",
+            to = "+919949700759"
+        )
+    elif(number == "8179040458"):
+        account_id_3 = "ACdc90c033b749e1ff3c6c424af74d24f7"
+        auth_token_3 = '21928393bee43cc0fcbaa75af8cd45b5'
+        client_3 = Client(account_id_3,auth_token_3)
+        msg = client_3.messages.create(
+            body = f"Your Online Curation Cheque System Verification Code: {otp}",
+            from_ = "+12135834640",
+            to = "+918179040458"
+        )
+    elif(number == "9959615537"):
+        account_id_4 = "AC675c8a4356802c994cca184f012021fb"
+        auth_token_4 = 'b8ab36cc2f8f2f255bc5690eaf7bfa18'
+        client_4 = Client(account_id_4,auth_token_4)
+        msg = client_4.messages.create(
+            body = f"Your Online Curation Cheque System Verification Code: {otp}",
+            from_ = "++15169730416",
+            to = "+919959615537"
+        )
+    if msg.sid:
+        return True
+    else:
+        return False
+
+
+@app.route('/validateOTP', methods = ['POST'])
+def validateOTP():
+    entered_otp = request.form['otp']
+    if(str(generated_otp) == str(entered_otp)):
+        return render_template('index1.html')
+    else:
+        return "Not a Verified User..."
+    
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
