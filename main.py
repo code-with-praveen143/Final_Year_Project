@@ -2,14 +2,9 @@ from flask import Flask, render_template, request, jsonify
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn
-##from sklearn import svm
-##from sklearn.metrics import accuracy_score
-##from sklearn.model_selection import train_test_split
-##from sklearn.decomposition import PCA
-##from sklearn.cluster import KMeans
 import cv2
 import os
-##import pandas as pd
+import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for
 import requests
 import csv
@@ -152,7 +147,7 @@ def write_csv(users):
 @app.route('/uploadDataset', methods=['GET'])
 def upload_dataset():
     global filename
-    filename = "C:\\Users\\VN Technologies\\Desktop\\website\\Dataset"
+    filename = "C:\\Users\\prave\\Final_Year_Project\\Dataset\\TrainSet\\X"
     return jsonify({'message': 'Dataset selected successfully'})
 
 
@@ -172,29 +167,6 @@ def split_dataset():
                     'total_images': len(X),
                     'train_split': len(X_train),
                     'test_split': len(X_test)})
-
-
-@app.route('/executeSVM', methods=['GET'])
-def execute_svm():
-    global classifier
-    global svm_acc
-    cls = svm.SVC()
-    cls.fit(X_train, y_train)
-    predict = cls.predict(X_test)
-    svm_acc = accuracy_score(y_test, predict) * 100
-    classifier = cls
-    return jsonify({'message': 'SVM executed successfully', 'svm_accuracy': svm_acc})
-
-
-@app.route('/executeKmeans', methods=['GET'])
-def execute_kmeans():
-    global kmeans_acc
-    kmeans = KMeans(n_clusters=2, random_state=0)
-    kmeans.fit(X_train)
-    predict = kmeans.predict(X_test)
-    kmeans_acc = accuracy_score(y_test, predict) * 100
-    return jsonify({'message': 'K-Means executed successfully', 'kmeans_accuracy': kmeans_acc})
-
 
 def predictsign(filename):
     img = cv2.imread(filename)
