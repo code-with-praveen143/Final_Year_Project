@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn
-import cv2
+from PIL import Image
 import os
 import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for
@@ -15,8 +15,15 @@ import os
 from werkzeug.utils import secure_filename
 from flask import *
 from twilio.rest import Client
+import pytesseract
+from pytesseract import Output
+import cv2
+import matplotlib.pyplot as plt
+import cv2
+import numpy as np
 import random
-
+#from sklearn.decomposition import PCA 
+#from sklearn.model_selection import train_test_split
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -94,17 +101,124 @@ def check_forgery():
         gray_img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         gray_img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
         score, _ = ssim(gray_img1, gray_img2, full=True)
+        ans = []
+        img = cv2.imread(image1_path)
+            # get grayscale image
+        def resize(image):
+            return cv2.resize(image,(400,300))
+        def get_grayscale(image):
+            return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
+        # noise removal
+        def remove_noise(image):
+            return cv2.medianBlur(image,5)
+        
+        #thresholding
+        def thresholding(image):
+            return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        #adaptiveThresholding
+        def adadaptiveThresholding(image):
+            return cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,\
+                    cv2.THRESH_BINARY,11,2)
+
+        #dilation
+        def dilate(image):
+            kernel = np.ones((5,5),np.uint8)
+            return cv2.dilate(image, kernel, iterations = 1)
+            
+        #erosion
+        def erode(image):
+            kernel = np.ones((5,5),np.uint8)
+            return cv2.erode(image, kernel, iterations = 1)
+
+        #opening - erosion followed by dilation
+        def opening(image):
+            kernel = np.ones((5,5),np.uint8)
+            return cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+
+        #canny edge detection
+        def canny(image):
+            return cv2.Canny(image, 100, 200)
+
+        #skew correction
+        def deskew(image):
+            coords = np.column_stack(np.where(image > 0))
+            angle = cv2.minAreaRect(coords)[-1]
+            if angle < -45:
+                angle = -(90 + angle)
+            else:
+                angle = -angle
+            (h, w) = image.shape[:2]
+            center = (w // 2, h // 2)
+            M = cv2.getRotationMatrix2D(center, angle, 1.0)
+            rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+            return rotated
+
+        #cropping
+        def cropping(image):
+            return image[200:510,200:2200]
+
+        #template matching
+        def match_template(image, template):
+            return cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED) 
+
+        image = cv2.imread(image1_path)
+
+        gray = get_grayscale(image)
+        #cv2.imshow('gray',gray)
+        thresh = thresholding(gray)
+        #cv2.imshow('thresh',thresh)
+        opening = opening(gray)
+        #cv2.imshow('opening',opening)
+        canny = canny(gray)
+        #cv2.imshow('canny',canny)
+        h, w, c = img.shape
+        boxes = pytesseract.image_to_boxes(img) 
+        myconfig = r"--oem 3 --psm 6"
+        data = pytesseract.image_to_data(img,config=myconfig, output_type=Output.DICT)
+        text_data = data['text']
+       
+
+        def preprocess_finale(im):
+            im= cv2.bilateralFilter(im, 5, 55,60)
+            im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+            _, im = cv2.threshold(im, 240, 255, 1)
+            return im
+
+        #img = Image.open("Image.png")
+        img = cv2.cvtColor(np.array(img2), cv2.COLOR_BGRA2BGR)
+
+        custom_config = r"--oem 3 --psm 4 -c tessedit_char_whitelist= '0123456789. '"
+        im=preprocess_finale(img)
+
+        text = pytesseract.image_to_string(im, lang='eng', config=custom_config)
+        print(text)
+        for b in boxes.splitlines():
+            b = b.split(' ')
+        img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
+        d = pytesseract.image_to_data(img,config=myconfig,output_type=Output.DICT)
+        n_boxes = len(d['text'])
+        for i in range(n_boxes):
+            if int(d['conf'][i]) > 80:
+                (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+                img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        cv2.imshow('img', img)
+        cv2.waitKey(0)
+        for i in text_data:
+            if(len(i)>2 and i.isascii() ):
+                ans.append(i)
+        print(ans)
         # Determine if images are forged based on SSIM score
         if score < 0.9:
-            forged = True
-        else:
             forged = False
+        else:
+            forged = True
+            
 
         # Delete uploaded images
         
-
-        return jsonify({'forged': forged, 'ssim': score})
+        return jsonify({'forged': forged, 'ssim': score, 'text':ans})
 
 
 # Home page with buttons
