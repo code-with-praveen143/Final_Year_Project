@@ -175,7 +175,7 @@ def check_forgery():
         h, w, c = img.shape
         boxes = pytesseract.image_to_boxes(img) 
         myconfig = r"--oem 3 --psm 6"
-        data = pytesseract.image_to_data(img,config=myconfig, output_type=Output.DICT)
+        data = pytesseract.image_to_data(gray,config=myconfig, output_type=Output.DICT)
         text_data = data['text']
        
 
@@ -195,20 +195,19 @@ def check_forgery():
         print(text)
         for b in boxes.splitlines():
             b = b.split(' ')
-        img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
-        d = pytesseract.image_to_data(img,config=myconfig,output_type=Output.DICT)
+        img = cv2.rectangle(gray, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
+        d = pytesseract.image_to_data(gray,output_type=Output.DICT)
         n_boxes = len(d['text'])
         for i in range(n_boxes):
             if int(d['conf'][i]) > 80:
                 (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
-                img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-        cv2.imshow('img', img)
-        cv2.waitKey(0)
+                img = cv2.rectangle(gray, (x, y), (x + w, y + h), (0, 255, 0), 2)
         for i in text_data:
-            if(len(i)>2 and i.isascii() ):
+            if(len(i)>2 and i.isascii()):
                 ans.append(i)
         print(ans)
+        cv2.imshow('img', gray)
+        cv2.waitKey(0)
         # Determine if images are forged based on SSIM score
         if score < 0.9:
             forged = False
@@ -219,6 +218,7 @@ def check_forgery():
         # Delete uploaded images
         
         return jsonify({'forged': forged, 'ssim': score, 'text':ans})
+
 
 
 # Home page with buttons
