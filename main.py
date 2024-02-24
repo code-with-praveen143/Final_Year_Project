@@ -1,12 +1,9 @@
 from flask import Flask, render_template, request, jsonify
 import matplotlib.pyplot as plt
 import numpy as np
-import sklearn
 from PIL import Image
 import os
-import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for
-import requests
 import csv
 from flask import Flask, render_template, request
 import cv2
@@ -22,8 +19,9 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 import random
-#from sklearn.decomposition import PCA 
-#from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA 
+from sklearn.model_selection import train_test_split
+from Model.resnet_model import model
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -202,10 +200,7 @@ def check_forgery():
             if int(d['conf'][i]) > 80:
                 (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
                 img = cv2.rectangle(gray, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        account_numbers = ['30002010108841']
-        account_number = ""
-        bank_name = ""
-        micr_number = ""
+
         for i in text_data:
             if(len(i)>2 and i.isascii()):
                 ans.append(i)
