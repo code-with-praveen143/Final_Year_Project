@@ -202,7 +202,10 @@ def check_forgery():
             if int(d['conf'][i]) > 80:
                 (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
                 img = cv2.rectangle(gray, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        account_numbers = ['']
+        account_numbers = ['30002010108841']
+        account_number = ""
+        bank_name = ""
+        micr_number = ""
         for i in text_data:
             if(len(i)>2 and i.isascii()):
                 ans.append(i)
@@ -218,7 +221,7 @@ def check_forgery():
 
         # Delete uploaded images
         
-        return jsonify({'forged': forged, 'ssim': score, 'text':ans, 'signature':text})
+        return jsonify({'forged': forged, 'ssim': score,  'signature':text, 'text':ans})
 
 
 # Home page with buttons
