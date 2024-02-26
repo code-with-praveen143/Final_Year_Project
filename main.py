@@ -207,11 +207,15 @@ def check_forgery():
         print(ans)
         cv2.imshow('img', gray)
         cv2.waitKey(0)
+        
+
+
         # Determine if images are forged based on SSIM score
         if score < 0.9:
             forged = False
         else:
             forged = True
+       
             
 
         # Delete uploaded images

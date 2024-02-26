@@ -119,45 +119,69 @@ X_train_scaled = X_train/255
 X_test_scaled = X_test/255
 
 X_train_scaled[0]
+try: 
+  from keras.layers import Dropout, Dense
+  from keras import optimizers
+  from keras.applications.resnet50 import ResNet50
+  restnet = ResNet50(include_top=False, weights='imagenet', input_shape=(128,128,3))
+  output = restnet.layers[-1].output
+  output = keras.layers.Flatten()(output)
+
+  for layer in restnet.layers:
+    layer.trainable = False
+
+  restnet.summary()
+
+  model1 = keras.Sequential()
+  model1.add(restnet)
+  model1.add(Dense(512, activation='relu', input_dim=(128,128,3)))
+  model1.add(Dropout(0.3))
+  model1.add(Dense(512, activation='relu'))
+  model1.add(Dropout(0.3))
+  model1.add(Dense(4, activation='sigmoid'))
+  model1.compile(loss='binary_crossentropy',
+  optimizer=optimizers.RMSprop(lr=2e-5),
+  metrics=['accuracy'])
+  model1.summary()
+
+  history = model1.fit(X_train_scaled, Y_train,batch_size=50,epochs=5,verbose=1)
+
+except:
+  num_of_classes = 2
+
+  model = keras.Sequential()
+
+  model.add(keras.layers.Conv2D(32, kernel_size=(3,3), activation='relu', input_shape=(128,128,3)))
+  model.add(keras.layers.MaxPooling2D(pool_size=(2,2)))
 
 
+  model.add(keras.layers.Conv2D(64, kernel_size=(3,3), activation='relu'))
+  model.add(keras.layers.MaxPooling2D(pool_size=(2,2)))
 
-num_of_classes = 2
+  model.add(keras.layers.Flatten())
 
-model = keras.Sequential()
+  model.add(keras.layers.Dense(128, activation='relu'))
+  model.add(keras.layers.Dropout(0.5))
 
-model.add(keras.layers.Conv2D(32, kernel_size=(3,3), activation='relu', input_shape=(128,128,3)))
-model.add(keras.layers.MaxPooling2D(pool_size=(2,2)))
-
-
-model.add(keras.layers.Conv2D(64, kernel_size=(3,3), activation='relu'))
-model.add(keras.layers.MaxPooling2D(pool_size=(2,2)))
-
-model.add(keras.layers.Flatten())
-
-model.add(keras.layers.Dense(128, activation='relu'))
-model.add(keras.layers.Dropout(0.5))
-
-model.add(keras.layers.Dense(64, activation='relu'))
-model.add(keras.layers.Dropout(0.5))
+  model.add(keras.layers.Dense(64, activation='relu'))
+  model.add(keras.layers.Dropout(0.5))
 
 
-model.add(keras.layers.Dense(num_of_classes, activation='sigmoid'))
+  model.add(keras.layers.Dense(num_of_classes, activation='sigmoid'))
 
-# compile the neural network
-model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
-model.summary()
+  # compile the neural network
+  model.compile(optimizer='adam',
+                loss='sparse_categorical_crossentropy',
+                metrics=['accuracy'])
+  model.summary()
 
-# training the neural network
-history = model.fit(X_train_scaled, Y_train, validation_split=0.1, epochs=15)
+  # training the neural network
+  history = model.fit(X_train_scaled, Y_train, validation_split=0.1, epochs=15)
 
 loss, accuracy = model.evaluate(X_test_scaled, Y_test)
 print('Test Accuracy =', accuracy)
 
 h = history
-
 # plot the loss value
 plt.plot(h.history['loss'], label='train loss')
 plt.plot(h.history['val_loss'], label='validation loss')
@@ -174,8 +198,8 @@ input_image_path = input('Path of the image to be predicted: ')
 
 input_image = cv2.imread(input_image_path)
 
-plt.imshow(input_image)
-plt.show()
+#plt.imshow(input_image)
+#plt.show()
 
 input_image_resized = cv2.resize(input_image, (128,128))
 
@@ -201,3 +225,4 @@ else:
 
   print('The given cheque is a original cheque')
 
+model.save("resnet_model.h5")
