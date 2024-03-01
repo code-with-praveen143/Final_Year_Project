@@ -19,8 +19,13 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 import random
+import keras
 from sklearn.decomposition import PCA 
 from sklearn.model_selection import train_test_split
+from keras.layers import Dropout, Dense
+from keras import optimizers
+from keras.applications.resnet50 import ResNet50
+import tensorflow as tf
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -73,6 +78,7 @@ def calculate_ssim(image1, image2):
     score, _ = ssim(gray_img1, gray_img2, full=True)
     return score
 
+
 # File upload route
 # Calculate SSIM and check if images are forged
 @app.route('/check_forgery', methods=['POST'])
@@ -93,6 +99,141 @@ def check_forgery():
         # Load images
         img1 = cv2.imread(image1_path)
         img2 = cv2.imread(image2_path)
+        original_cheques= os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data')
+        fake_cheques = os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data')
+        # create the labels
+        original_cheques_labes = [1]*110
+
+        fake_cheques_labels = [0]*29
+
+        labels = original_cheques_labes + fake_cheques_labels
+
+        # convert images to numpy arrays+
+
+        original_cheque_images_path = 'C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data\\'
+
+        data = []
+
+        for img_file in original_cheques:
+
+            image = Image.open(original_cheque_images_path + img_file)
+            image = image.resize((128,128))
+            image = image.convert('RGB')
+            image = np.array(image)
+            data.append(image)
+
+        fake_cheques_path = 'C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data\\'
+
+        for img_file in fake_cheques:
+
+            image = Image.open(fake_cheques_path + img_file)
+            image = image.resize((128,128))
+            image = image.convert('RGB')
+            image = np.array(image)
+            data.append(image)
+
+        # converting image list and label list to numpy arrays
+
+        X = np.array(data)
+        Y = np.array(labels)
+
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=2)
+
+        # scaling the data
+
+        X_train_scaled = X_train/255
+
+        X_test_scaled = X_test/255
+
+        X_train_scaled[0]
+        from keras.layers import Dropout, Dense
+        from keras import optimizers
+        from keras.applications.resnet50 import ResNet50
+        restnet = ResNet50(include_top=False, weights='imagenet', input_shape=(128,128,3))
+        output = restnet.layers[-1].output
+        # output = keras.layers.Flatten()(output)
+
+        for layer in restnet.layers:
+            layer.trainable = False
+
+        restnet.summary()
+        import keras
+        model = keras.Sequential()
+        model.add(restnet)
+        model.add(Dense(512, activation='relu', input_dim=(128,128,3)))
+        model.add(Dropout(0.3))
+        model.add(Dense(512, activation='relu'))
+        model.add(Dropout(0.3))
+        model.add(Dense(4, activation='sigmoid'))
+        model.compile(loss='binary_crossentropy',
+        optimizer=optimizers.RMSprop(lr=2e-5),
+        metrics=['accuracy'])
+        model.summary()
+
+        num_of_classes = 2
+        import keras
+
+        model = tf.keras.Sequential()
+
+        model.add(keras.layers.Conv2D(32, kernel_size=(3,3), activation='relu', input_shape=(128,128,3)))
+        model.add(keras.layers.MaxPooling2D(pool_size=(2,2)))
+
+
+        model.add(keras.layers.Conv2D(64, kernel_size=(3,3), activation='relu'))
+        model.add(keras.layers.MaxPooling2D(pool_size=(2,2)))
+
+        model.add(keras.layers.Flatten())
+
+        model.add(keras.layers.Dense(128, activation='relu'))
+        model.add(keras.layers.Dropout(0.5))
+
+        model.add(keras.layers.Dense(64, activation='relu'))
+        model.add(keras.layers.Dropout(0.5))
+
+
+        model.add(keras.layers.Dense(num_of_classes, activation='sigmoid'))
+
+        # compile the neural network
+        model.compile(optimizer='adam',
+                    loss='sparse_categorical_crossentropy',
+                    metrics=['accuracy'])
+        model.summary()
+
+        # training the neural network
+        history = model.fit(X_train_scaled, Y_train, validation_split=0.1, epochs=15)
+
+        loss, accuracy = model.evaluate(X_test_scaled, Y_test)
+        print('Test Accuracy =', accuracy)
+
+        h = history
+        # # plot the loss value
+        # plt.plot(h.history['loss'], label='train loss')
+        # plt.plot(h.history['val_loss'], label='validation loss')
+        # plt.legend()
+        # plt.show()
+
+        # # plot the accuracy value
+        # plt.plot(h.history['accuracy'], label='train accuracy')
+        # plt.plot(h.history['val_accuracy'], label='validation accuracy')
+        # plt.legend()
+        # plt.show()
+    
+        #input_image_path = input('Path of the image to be predicted: ')
+
+        input_image = cv2.imread(image1_path)
+
+        input_image_resized = cv2.resize(input_image, (128,128))
+
+        input_image_scaled = input_image_resized / 255
+
+        input_image_reshaped = np.reshape(input_image_scaled, [1,128,128,3])
+
+        input_prediction = model.predict(input_image_reshaped)
+
+        input_pred_label = np.argmax(input_prediction)
+
+        print("The input prediction result :",input_pred_label)
+
 
         # Calculate SSIM
         gray_img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
@@ -203,21 +344,18 @@ def check_forgery():
         for i in text_data:
             if(len(i)>2 and i.isascii()):
                 ans.append(i)
-        print(ans)
         cv2.imshow('img', gray)
         cv2.waitKey(0)
-        
         # Determine if images are forged based on SSIM score
-        if score < 0.9:
+        if input_pred_label == 1 :
             forged = False
-        else:
+            return jsonify({'forged': forged, 'ssim': score,  'signature':text, 'text':ans})
+        elif input_pred_label == 0:
             forged = True
-       
-            
-
-        # Delete uploaded images
+            return jsonify({'text': 'The given cheque is a fake cheque'})
+        else: 
+            return jsonify("Give a valid input cheque image")
         
-        return jsonify({'forged': forged, 'ssim': score,  'signature':text, 'text':ans})
 
 
 # Home page with buttons
@@ -283,35 +421,6 @@ def split_dataset():
                     'total_images': len(X),
                     'train_split': len(X_train),
                     'test_split': len(X_test)})
-
-def predictsign(filename):
-    img = cv2.imread(filename)
-    img = cv2.resize(img, (64, 64))
-    im2arr = np.array(img)
-    im2arr = im2arr.reshape(64, 64, 3)
-    im2arr = im2arr.astype('float32')
-    im2arr = im2arr / 255
-    test = []
-    test.append(im2arr)
-    test = np.asarray(test)
-    test = np.reshape(test, (test.shape[0], (test.shape[1] * test.shape[2] * test.shape[3])))
-    test = pca.transform(test)
-    predict = classifier.predict(test)[0]
-    msg = ''
-    if predict == 0:
-        msg = "not forged"
-    if predict == 1:
-        msg = "forged"
-    dict['msg']=msg 
-    img = cv2.imread(filename)
-    img = cv2.resize(img, (400, 400))
-    cv2.putText(img, msg, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
-    cv2.imshow(msg, img)
-    cv2.waitKey(0) 
-    # closing all open windows 
-    cv2.destroyAllWindows() 
-    return msg, img
-
 
 
 
