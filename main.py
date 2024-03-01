@@ -476,6 +476,7 @@ def getOTP():
 #     return random.randrange(100000,999999)
 def getOTPApi(number):
     # otp = generateOTP()
+    global msg 
     if(number == "7569993454"):
         account_id_1 = "ACb149e7a0d945b21d311a10f1e1c02a7b"
         auth_token_1 = 'd1c66b4f2384ee26098caa8ef846a492'
@@ -512,6 +513,7 @@ def getOTPApi(number):
             from_ = "++15169730416",
             to = "+919959615537"
         )
+        
     if msg.sid:
         return True
     else:
