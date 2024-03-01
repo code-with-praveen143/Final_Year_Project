@@ -21,7 +21,6 @@ import numpy as np
 import random
 from sklearn.decomposition import PCA 
 from sklearn.model_selection import train_test_split
-from Model.resnet_model import model
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -208,8 +207,6 @@ def check_forgery():
         cv2.imshow('img', gray)
         cv2.waitKey(0)
         
-
-
         # Determine if images are forged based on SSIM score
         if score < 0.9:
             forged = False
@@ -255,7 +252,7 @@ def read_csv():
 # Function to write to CSV file
 def write_csv(users):
     with open('users.csv', 'w', newline='') as file:
-        fieldnames = ['username', 'password', 'email', 'fullname']
+        fieldnames = ['username', 'password', 'email', 'fullname','phonenumber']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(users)
@@ -326,10 +323,11 @@ def register():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
+        phonenumber = request.form['phonenumber']
         fullname = request.form['fullname']
 
         users = read_csv()
-        users.append({'username': username, 'password': password, 'email': email, 'fullname': fullname})
+        users.append({'username': username, 'password': password, 'email': email, 'fullname': fullname, 'phonenumber':phonenumber})
         write_csv(users)
         users = read_csv()
 
