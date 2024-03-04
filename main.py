@@ -328,7 +328,7 @@ def check_forgery():
         im=preprocess_finale(img)
 
         text = pytesseract.image_to_string(im, lang='eng', config=custom_config)
-        print(text)
+        print("Extracted Signature text : ",text)
         for b in boxes.splitlines():
             b = b.split(' ')
         img = cv2.rectangle(gray, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
@@ -342,10 +342,12 @@ def check_forgery():
         for i in text_data:
             if(len(i)>2 and i.isascii()):
                 ans.append(i)
-        print(ans)
+        print("Extracted information from cheque : ",ans)
         cv2.imshow('img', gray)
         cv2.waitKey(0)
         # Determine if images are forged based on SSIM score
+        score = calculate_ssim(image1_path, image2_path)
+        print("The ssim value : ",score)
         if input_pred_label == 1 :
             forged = False
             return jsonify({'result':"The given cheque is a original cheque"})
@@ -353,7 +355,7 @@ def check_forgery():
             forged = True
             return jsonify({'result': 'The given cheque is a fake cheque'})
         else: 
-            return jsonify("Give a valid input cheque image")
+            return jsonify({"Give a valid input cheque image"})
         
 
 
