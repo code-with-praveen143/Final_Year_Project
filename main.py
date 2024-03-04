@@ -344,15 +344,16 @@ def check_forgery():
         for i in text_data:
             if(len(i)>2 and i.isascii()):
                 ans.append(i)
+        print(ans)
         cv2.imshow('img', gray)
         cv2.waitKey(0)
         # Determine if images are forged based on SSIM score
         if input_pred_label == 1 :
             forged = False
-            return jsonify({'forged': forged, 'ssim': score,  'signature':text, 'text':ans})
+            return jsonify({'result':"The given cheque is a original cheque"})
         elif input_pred_label == 0:
             forged = True
-            return jsonify({'text': 'The given cheque is a fake cheque'})
+            return jsonify({'result': 'The given cheque is a fake cheque'})
         else: 
             return jsonify("Give a valid input cheque image")
         
