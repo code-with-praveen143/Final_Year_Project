@@ -99,34 +99,32 @@ def check_forgery():
         # Load images
         img1 = cv2.imread(image1_path)
         img2 = cv2.imread(image2_path)
-        original_cheques= os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data')
-        fake_cheques = os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data')
+        training_data= os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data')
+        testing_data = os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data')
         # create the labels
-        original_cheques_labes = [1]*110
-
-        fake_cheques_labels = [0]*29
-
-        labels = original_cheques_labes + fake_cheques_labels
+        training_labels = [1]*110
+        testing_labels = [0]*29
+        labels = training_labels + testing_labels
 
         # convert images to numpy arrays+
 
-        original_cheque_images_path = 'C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data\\'
+        training_data_path = 'C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data\\'
 
         data = []
 
-        for img_file in original_cheques:
+        for img_file in training_data:
 
-            image = Image.open(original_cheque_images_path + img_file)
+            image = Image.open(training_data_path + img_file)
             image = image.resize((128,128))
             image = image.convert('RGB')
             image = np.array(image)
             data.append(image)
 
-        fake_cheques_path = 'C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data\\'
+        testing_data_path = 'C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data\\'
 
-        for img_file in fake_cheques:
+        for img_file in testing_data:
 
-            image = Image.open(fake_cheques_path + img_file)
+            image = Image.open(testing_data_path + img_file)
             image = image.resize((128,128))
             image = image.convert('RGB')
             image = np.array(image)
