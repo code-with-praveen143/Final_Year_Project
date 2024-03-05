@@ -99,6 +99,9 @@ def check_forgery():
         # Load images
         img1 = cv2.imread(image1_path)
         img2 = cv2.imread(image2_path)
+
+        # RESNET-50 Model 
+        
         original_cheques= os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data')
         fake_cheques = os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data')
         # create the labels
@@ -347,6 +350,9 @@ def check_forgery():
         print(ans)
         cv2.imshow('img', gray)
         cv2.waitKey(0)
+
+        score  = calculate_ssim(image1_path,image2_path)
+        print("Calculate SSIM score : ",score)
         # Determine if images are forged based on SSIM score
         if input_pred_label == 1 :
             forged = False
@@ -452,6 +458,8 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
+        
+
         users = read_csv()
         for user in users:
             if user['username'] == username and user['password'] == password:
@@ -483,7 +491,7 @@ def getOTPApi(number):
         auth_token_1 = 'd1c66b4f2384ee26098caa8ef846a492'
         client_1 = Client(account_id_1,auth_token_1)
         msg = client_1.messages.create(
-            body = f"Your Online Curation Cheque System Verification Code: {otp}",
+            body = f"Your Online  Cheque Curation and Abstract System Verification Code: {otp}",
             from_ = "+19282491201",
             to = "+917569993454"
         )
@@ -492,7 +500,7 @@ def getOTPApi(number):
         auth_token_2 = '777a478fd79b98b597f6c8a985f85cf0'
         client_2 = Client(account_id_2,auth_token_2)
         msg = client_2.messages.create(
-            body = f"Your Online Curation Cheque System Verification Code: {otp}",
+            body = f"Your Online  Cheque Curation and Abstract System Verification Code: {otp}",
             from_ = "+19792726652",
             to = "+919949700759"
         )
@@ -501,7 +509,7 @@ def getOTPApi(number):
         auth_token_3 = '21928393bee43cc0fcbaa75af8cd45b5'
         client_3 = Client(account_id_3,auth_token_3)
         msg = client_3.messages.create(
-            body = f"Your Online Curation Cheque System Verification Code: {otp}",
+            body = f"Your Online  Cheque Curation and Abstract System Verification Code: {otp}",
             from_ = "+12135834640",
             to = "+918179040458"
         )
@@ -510,7 +518,7 @@ def getOTPApi(number):
         auth_token_4 = 'b8ab36cc2f8f2f255bc5690eaf7bfa18'
         client_4 = Client(account_id_4,auth_token_4)
         msg = client_4.messages.create(
-            body = f"Your Online Curation Cheque System Verification Code: {otp}",
+            body = f"Your Online  Cheque Curation and Abstract System Verification Code: {otp}",
             from_ = "++15169730416",
             to = "+919959615537"
         )
