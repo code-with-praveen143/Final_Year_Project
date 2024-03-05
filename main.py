@@ -149,7 +149,7 @@ def check_forgery():
         from keras.applications.resnet50 import ResNet50
         restnet = ResNet50(include_top=False, weights='imagenet', input_shape=(128,128,3))
         output = restnet.layers[-1].output
-        # output = keras.layers.Flatten()(output)
+  
 
         for layer in restnet.layers:
             layer.trainable = False
