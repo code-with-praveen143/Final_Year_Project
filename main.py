@@ -99,37 +99,40 @@ def check_forgery():
         # Load images
         img1 = cv2.imread(image1_path)
         img2 = cv2.imread(image2_path)
+<<<<<<< HEAD
 
         # RESNET-50 Model 
         
         original_cheques= os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data')
         fake_cheques = os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data')
+=======
+        training_data= os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data')
+        testing_data = os.listdir('C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data')
+>>>>>>> 3d668fefe3f0598b6c70b208a0b9ac8c977cd380
         # create the labels
-        original_cheques_labes = [1]*110
-
-        fake_cheques_labels = [0]*29
-
-        labels = original_cheques_labes + fake_cheques_labels
+        training_labels = [1]*110
+        testing_labels = [0]*29
+        labels = training_labels + testing_labels
 
         # convert images to numpy arrays+
 
-        original_cheque_images_path = 'C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data\\'
+        training_data_path = 'C:\\Users\\prave\\Final_Year_Project\\Dataset\\Training_Data\\'
 
         data = []
 
-        for img_file in original_cheques:
+        for img_file in training_data:
 
-            image = Image.open(original_cheque_images_path + img_file)
+            image = Image.open(training_data_path + img_file)
             image = image.resize((128,128))
             image = image.convert('RGB')
             image = np.array(image)
             data.append(image)
 
-        fake_cheques_path = 'C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data\\'
+        testing_data_path = 'C:\\Users\\prave\\Final_Year_Project\\Dataset\\Testing_Data\\'
 
-        for img_file in fake_cheques:
+        for img_file in testing_data:
 
-            image = Image.open(fake_cheques_path + img_file)
+            image = Image.open(testing_data_path + img_file)
             image = image.resize((128,128))
             image = image.convert('RGB')
             image = np.array(image)
@@ -154,7 +157,7 @@ def check_forgery():
         from keras.applications.resnet50 import ResNet50
         restnet = ResNet50(include_top=False, weights='imagenet', input_shape=(128,128,3))
         output = restnet.layers[-1].output
-        # output = keras.layers.Flatten()(output)
+  
 
         for layer in restnet.layers:
             layer.trainable = False
@@ -333,7 +336,11 @@ def check_forgery():
         im=preprocess_finale(img)
 
         text = pytesseract.image_to_string(im, lang='eng', config=custom_config)
+<<<<<<< HEAD
         print("Extracted Signature : ",text)
+=======
+        print("Extracted Signature text : ",text)
+>>>>>>> 3d668fefe3f0598b6c70b208a0b9ac8c977cd380
         for b in boxes.splitlines():
             b = b.split(' ')
         img = cv2.rectangle(gray, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
@@ -347,13 +354,19 @@ def check_forgery():
         for i in text_data:
             if(len(i)>2 and i.isascii()):
                 ans.append(i)
+<<<<<<< HEAD
         print("Extracted Information from cheque : ",ans)
+=======
+        print("Extracted information from cheque : ",ans)
+>>>>>>> 3d668fefe3f0598b6c70b208a0b9ac8c977cd380
         cv2.imshow('img', gray)
         cv2.waitKey(0)
 
         score  = calculate_ssim(image1_path,image2_path)
         print("Calculate SSIM score : ",abs(score))
         # Determine if images are forged based on SSIM score
+        score = calculate_ssim(image1_path, image2_path)
+        print("The ssim value : ",score)
         if input_pred_label == 1 :
             forged = False
             return jsonify({'result':"The given cheque is a original cheque"})
@@ -361,7 +374,7 @@ def check_forgery():
             forged = True
             return jsonify({'result': 'The given cheque is a fake cheque'})
         else: 
-            return jsonify("Give a valid input cheque image")
+            return jsonify({"Give a valid input cheque image"})
         
 
 
