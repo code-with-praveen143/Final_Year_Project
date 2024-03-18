@@ -15,7 +15,7 @@
     <style>
         .bg-container{
             background-image: url('https://images.blocksurvey.io/cdn-cgi/imagedelivery/G6cPOuGZ4Z_bEV13gBxixw/templates/daycare-registration-form.png/s');
-            height: 100vh;
+            min-height: 100vh;
             background-size: cover;
             display: flex;
             flex-direction: column;
@@ -56,11 +56,21 @@
         .main-heading{
             text-align: center;
         }
+        .card-container{
+            padding-top: 10px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        } 
+        .description{
+            padding-right: 4px;
+        }
     </style>
 </head>
 <body>
     <div class="bg-container">
         <div class="login-card">
+            <h1 class="main-heading">ONLINE CHEQUE CURATION AND ABSTRACT USING DEEP LEARNING</h1>
             <h1 class="main-heading">User Registration</h1>
             <form action="/register" method="post" class="login-form">
                 <div class="card-entry">
@@ -84,6 +94,10 @@
                     <input type="password" id="password" name="password" required><br><br>
                 </div>
                 <input type="submit" value="Register" class="register-button">
+                <div class="card-container">
+                    <p class="description">Already have an account?</p>
+                    <a href="{{ url_for('login') }}">Login</a>
+                </div>
             </form>
         </div>
     </div>
